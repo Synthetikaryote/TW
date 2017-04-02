@@ -1,1 +1,15 @@
-﻿//adapted from http://wiki.unity3d.com/index.php?title=CreateScriptableObjectAssetusing UnityEngine;using UnityEditor;public abstract class DataObject<Derived> : ScriptableObject  where Derived : DataObject<Derived>{  //public const string DataName = "DataObject";  //[MenuItem("Assets/Create/"+ DataObject<Derived>.DataName)]  public static void CreateAsset()  {    DataUtilities.CreateAsset<Derived>();  }}
+﻿//adapted from http://wiki.unity3d.com/index.php?title=CreateScriptableObjectAsset
+
+using UnityEngine;
+using UnityEditor;
+
+[DataObjectRoot()]
+[DataObjectClass()]
+public abstract class DataObject<Derived> : ScriptableObject
+  where Derived : DataObject<Derived>
+{
+  public static void CreateAsset()
+  {
+    DataObject.Utilities.CreateAsset<Derived>();
+  }
+}
