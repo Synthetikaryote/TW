@@ -4,9 +4,9 @@ using System.Collections;
 public class LaneWorldObject : MonoBehaviour {
 
   private Vector3 Velocity = Vector3.zero;
-  private float Speed = 1.0f;
+  private float Speed = 6.0f;
 
-  public void SetDirection(Vector3 Direction)
+  public void SetVelocity(Vector3 Direction)
   {
     Velocity = Speed * Direction;
   }

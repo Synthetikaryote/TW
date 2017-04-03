@@ -1,60 +1,1 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-
-public class LaneWorld : MonoBehaviour
-{
-  //BN: y-up, z-forward, x-right
-
-  public int LaneCount = 4; //lanes indexed from -z to +z
-  public float LaneWidth = 2.0f;
-  public float LaneLength = 5.0f;
-  public GameObject LaneObjectPrefab;
-
-  private List<LaneWorldObject>[] LaneObjectRoster;
-      
-	void Start ()
-  {
-    Debug.Assert(transform); //requires transform
-    LaneObjectRoster = new List<LaneWorldObject>[LaneCount];
-  }
-	
-	void Update ()
-  {
-	
-	}
-
-  void SpawnObject(int Lane, float NormedDistance, bool DistanceFromLeft)
-  {
-    Vector3 pos = GetPositionOnLane(Lane, NormedDistance * LaneLength, DistanceFromLeft);
-    Quaternion rot = GetRotationOnLane(DistanceFromLeft);
-    LaneWorldObject newObject = (LaneWorldObject)Instantiate(LaneObjectPrefab, pos, rot);
-    newObject.SetDirection(GetLaneDirection(DistanceFromLeft));
-    LaneObjectRoster[Lane].Add(newObject);
-  }
-
-  private Quaternion GetRotationOnLane(bool FromLeft)
-  {
-    return transform.rotation * Quaternion.AngleAxis(FromLeft ? 90.0f : -90.0f, transform.up);
-  }
-
-  private Vector3 GetPositionOnLane(int Lane, float Distance, bool DistanceFromLeft)
-  {
-    Debug.Assert(Distance >= 0.0f && Distance <= LaneLength);
-    Debug.Assert(Lane >= 0 && Lane < LaneCount);
-
-    return (transform.forward * DistanceToLaneCentre(Lane))
-      + (GetLaneDirection(DistanceFromLeft) * Distance)
-      + transform.position;
-  }
-
-  Vector3 GetLaneDirection(bool FromLeft)
-  {
-    return FromLeft ? transform.right : -transform.right;
-  }
-
-  private float DistanceToLaneCentre(int Lane)
-  {
-    return ((float)(Lane) - ((float)(LaneCount - 1) / 2)) * LaneWidth;
-  }
-}
+﻿using UnityEngine;using System.Collections;using System.Collections.Generic;public class LaneWorld : MonoBehaviour{  //test values  public float TestSpawnInterval = 2.0f;  private float TestSpawnTime = 0.0f;  //BN: y-up, z-forward, x-right  public int LaneCount = 4; //lanes indexed from -z to +z  private float LaneWidth = 2.0f;  private float LaneLength = 5.0f;  public GameObject LaneObjectPrefab;  private List<GameObject>[] LaneObjectRoster;      	void Start ()  {    LaneObjectRoster = new List<GameObject>[LaneCount];    for (int i = 0; i < LaneObjectRoster.Length; ++i)    {      LaneObjectRoster[i] = new List<GameObject>();    }    LaneWidth = (10.0f * gameObject.transform.localScale.x) / ((float)LaneCount);    LaneLength = (10.0f * gameObject.transform.localScale.y);  }		void Update ()  {    //draw lanes    for(int i = 0; i < LaneCount; ++i)    {      Debug.DrawLine(GetLaneStart(i, true), GetLaneEnd(i, true), Color.red, 0.0f, false);     }    //test    TestSpawnTime += Time.deltaTime;    if (TestSpawnTime > TestSpawnInterval)    {      TestSpawnTime -= TestSpawnInterval;      //spawn prefabs and have them walk down the lanes      int lane = Random.Range(0, LaneCount);      bool fromLeft = false;      SpawnObject(lane, 0.0f, fromLeft);    }	}  void SpawnObject(int Lane, float NormedDistance, bool MeasuredFromLeft)  {    Debug.Assert(Lane < LaneCount);    Vector3 pos = GetPositionOnLane(Lane, NormedDistance * LaneLength, MeasuredFromLeft);    Quaternion rot = GetRotationOnLane(MeasuredFromLeft);    GameObject newObject = (GameObject)Instantiate(LaneObjectPrefab, pos, rot) as GameObject;    LaneWorldObject laneComponent = newObject.GetComponent<LaneWorldObject>();    laneComponent.SetVelocity(GetLaneDirection(MeasuredFromLeft));        Debug.Assert(LaneObjectRoster.Length == LaneCount);    LaneObjectRoster[Lane].Add(newObject);  }  private Quaternion GetRotationOnLane(bool FromLeft)  {    return transform.rotation * Quaternion.AngleAxis(FromLeft ? 90.0f : -90.0f, transform.up);  }  private Vector3 GetPositionOnLane(int Lane, float Distance, bool DistanceFromLeft)  {    Debug.Assert(Distance >= 0.0f && Distance <= LaneLength);    Debug.Assert(Lane >= 0 && Lane < LaneCount);    return (transform.forward * DistanceToLaneCentre(Lane))      + (GetLaneDirection(DistanceFromLeft) * (Distance - 0.5f))      + transform.position;  }  Vector3 GetLaneStart(int Lane, bool FromLeft)  {    return GetPositionOnLane(Lane, 0.0f, FromLeft);  }  Vector3 GetLaneEnd(int Lane, bool FromLeft)  {    return GetPositionOnLane(Lane, 1.0f, FromLeft);  }  Vector3 GetLaneDirection(bool FromLeft)  {    return FromLeft ? transform.right : -transform.right;  }  private float DistanceToLaneCentre(int Lane)  {    return ((float)(Lane) - ((float)(LaneCount - 1) / 2)) * LaneWidth;  }}
